@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全国金魚スポットマップ</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Zen+Old+Mincho:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="fish-tank">
+                <div class="fish"></div>
+                <div class="fish"></div>
+                <div class="fish"></div>
+            </div>
+
+            <header>
+                <h1>全国金魚スポット</h1>
+                <p>癒やしの空間を探そう</p>
+            </header>
+            
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="search-input" placeholder="名称や県名で検索...">
+            </div>
+
+            <div class="filters">
+                <button class="filter-btn active" data-category="all">すべて</button>
+                <button class="filter-btn" data-category="常設展示">常設展示</button>
+                <button class="filter-btn" data-category="イベント">イベント</button>
+                <button class="filter-btn" data-category="養殖・直売">養殖・直売</button>
+                <button class="filter-btn" data-category="品評会">品評会</button>
+                <button class="filter-btn" data-category="その他">その他</button>
+            </div>
+
+            <div class="location-list" id="location-list">
+                </div>
+            
+            <footer>
+                <small>&copy; 2026 Goldfish Map</small>
+            </footer>
+        </aside>
+        
+        <main class="map-container">
+            <div id="map"></div>
+        </main>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
