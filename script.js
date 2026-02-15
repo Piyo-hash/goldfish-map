@@ -154,3 +154,15 @@ searchInput.addEventListener('input', (e) => {
     searchQuery = e.target.value;
     filterData();
 });
+// サイドバー開閉の仕組み
+const sidebar = document.getElementById('sidebar');
+const toggleBtn = document.getElementById('toggle-sidebar');
+
+toggleBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+    
+    // 地図の表示崩れを防ぐため、少し遅れてサイズを再計算
+    setTimeout(() => {
+        map.invalidateSize();
+    }, 400);
+});

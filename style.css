@@ -1,261 +1,73 @@
-.app-container {
-    /* 従来の100vhの代わりに、実際の表示領域に合わせる設定 */
-    height: 100dvh; 
-    width: 100vw;
-    position: relative;
-    overflow: hidden;
-    /* 指でグイッとした時に画面が揺れるのを防ぐ */
-    touch-action: none; 
-}
-
-/* サイドバーの中だけはスクロールできるようにする */
-.location-list {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch; /* 指の動きに合わせてヌルヌル動かす */
-}
-/* 1. 画面全体の土台を固める（これがないと地図が消えます） */
 html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    width: 100%;
-    overflow: hidden; /* 画面がガタガタ動かないように */
-    font-family: 'Noto Sans JP', sans-serif;
+    margin: 0; padding: 0; height: 100%; width: 100%;
+    overflow: hidden; font-family: 'Noto Serif JP', serif;
 }
 
-/* 2. アプリ全体の箱 */
 .app-container {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
+    position: relative; width: 100vw; height: 100dvh;
 }
 
-/* 3. 地図を画面いっぱいに広げる */
-.map-container, #map {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1; /* 一番下に配置 */
+#map {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
 }
 
-/* 4. サイドバーを地図の上に浮かせる（グラスモーフィズム） */
+/* サイドバー本体（スリム版 280px） */
 .sidebar {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    bottom: 20px;
-    width: 350px;
-    
-    background: rgba(255, 255, 255, 0.75); /* 透け感 */
-    backdrop-filter: blur(12px); /* ぼかし効果 */
-    -webkit-backdrop-filter: blur(12px);
-    
-    border-radius: 24px; /* 角丸でモダンに */
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    position: absolute; top: 20px; left: 20px; bottom: 20px;
+    width: 280px; z-index: 1000;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.4);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-    
-    z-index: 1000; /* 地図より上に */
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    overflow: hidden; /* はみ出し防止 */
+    display: flex; flex-direction: column; padding: 15px;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 5. サイドバーの中身のデザイン（おまけ：和モダン調整） */
-h1 {
-    font-family: 'Zen Old Mincho', serif;
-    margin: 0;
-    color: #be123c; /* 金魚っぽい赤 */
-    font-size: 1.5rem;
+/* 閉じている状態 */
+.sidebar.collapsed {
+    transform: translateX(calc(-100% - 20px));
 }
 
-.location-list {
-    flex: 1;
-    overflow-y: auto; /* リストが増えたらスクロール */
-    margin-top: 20px;
+/* 開閉ボタン */
+.toggle-btn {
+    position: absolute; right: -40px; top: 20px;
+    width: 35px; height: 44px;
+    background: rgba(255, 255, 255, 0.8);
+    border: none; border-radius: 0 10px 10px 0;
+    cursor: pointer; color: #be123c;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
 }
 
-.location-item {
-    background: rgba(255, 255, 255, 0.5);
-    margin-bottom: 12px;
-    padding: 15px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: 0.3s;
-    border: 1px solid transparent;
-}
+.sidebar.collapsed .toggle-btn i { transform: rotate(180deg); }
 
-.location-item:hover {
-    background: white;
-    transform: translateY(-2px);
-    border-color: #be123c;
-}
-/* 検索ボックスのコンテナ */
-.search-box {
-    position: relative;
-    margin-bottom: 20px;
-}
+/* パーツのデザイン */
+h1 { font-family: 'Zen Old Mincho', serif; color: #be123c; font-size: 1.3rem; margin: 0; }
+.search-box { position: relative; margin: 15px 0; }
+#search-input { width: 100%; height: 40px; border-radius: 10px; border: 1px solid #ddd; padding-left: 35px; font-size: 16px; box-sizing: border-box;}
+.search-box i { position: absolute; left: 10px; top: 12px; color: #999; }
 
-/* 検索入力欄本体 */
-#search-input {
-    width: 100%;
-    padding: 12px 12px 12px 40px; /* 左側にアイコン用のスペース */
-    border-radius: 12px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    background: rgba(255, 255, 255, 0.5);
-    font-size: 14px;
-    box-sizing: border-box;
-    transition: all 0.3s;
-}
+.filters { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; }
+.filter-btn { padding: 5px 10px; border-radius: 15px; border: 1px solid #ddd; background: white; font-size: 11px; cursor: pointer; font-weight: bold;}
+.filter-btn.active { background: #be123c; color: white; border-color: #be123c; }
 
-#search-input:focus {
-    outline: none;
-    background: white;
-    border-color: #be123c; /* 金魚の赤 */
-    box-shadow: 0 0 0 3px rgba(190, 18, 60, 0.1);
-}
+.location-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.location-item { background: rgba(255,255,255,0.5); padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; transition: 0.2s; }
+.location-item:hover { background: white; }
+.location-title { font-weight: bold; font-family: 'Zen Old Mincho', serif; display: block; }
+.location-desc { font-size: 0.8rem; color: #666; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-/* 検索アイコンの位置調整 */
-.search-box i {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #999;
-}
+/* 金魚アニメ */
+.fish-tank { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; opacity: 0.3; }
+.fish { position: absolute; width: 15px; height: 8px; background: #be123c; border-radius: 50%; }
+.fish::after { content: ''; position: absolute; right: -5px; top: -2px; width: 8px; height: 12px; background: #be123c; clip-path: polygon(0 50%, 100% 0, 80% 50%, 100% 100%); }
+@keyframes swim { 0% { transform: translate(-50px, 0); } 100% { transform: translate(400px, 0); } }
+.fish:nth-child(1) { top: 20%; animation: swim 12s infinite linear; }
+.fish:nth-child(2) { top: 50%; animation: swim 18s infinite linear 2s; }
+.fish:nth-child(3) { top: 80%; animation: swim 15s infinite linear 5s; }
 
-/* フィルタボタンのエリア */
-.filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 20px;
-}
-
-/* フィルタボタン単体 */
-.filter-btn {
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    background: rgba(255, 255, 255, 0.6);
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: #444;
-}
-
-.filter-btn:hover {
-    background: rgba(255, 255, 255, 1);
-    transform: translateY(-1px);
-}
-
-/* ボタンが押されている時の状態 */
-.filter-btn.active {
-    background: #be123c;
-    color: white;
-    border-color: #be123c;
-    box-shadow: 0 4px 12px rgba(190, 18, 60, 0.2);
-}
-/* 全体のデフォルトフォントを「源ノ明朝」にして上品な印象に */
-body {
-    font-family: 'Noto Serif JP', serif;
-    color: #333;
-    line-height: 1.8;
-}
-
-/* サイドバーの見出し（アプリ名など） */
-h1, .sidebar header h1 {
-    font-family: 'Zen Old Mincho', serif;
-    font-weight: 700; /* 太字 */
-    letter-spacing: 0.1em; /* 少し字間を広げて高級感を出す */
-    color: #be123c;
-}
-
-/* リスト内の【場所の名前】を太字にしてデザイン性を高める */
-.location-title {
-    font-family: 'Zen Old Mincho', serif;
-    font-weight: 700; /* しっかり太字 */
-    font-size: 1.1rem;
-    margin-bottom: 5px;
-    color: #1a1a1a;
-    display: block; /* 独立した一行に */
-}
-
-/* 地図の吹き出し（Popup）内の【場所の名前】 */
-.leaflet-popup-content h3 {
-    font-family: 'Zen Old Mincho', serif;
-    font-weight: 700; /* 太字 */
-    font-size: 1.2rem;
-    margin: 0 0 10px 0;
-    padding-bottom: 5px;
-    border-bottom: 1px solid #be123c;
-    color: #be123c;
-}
-
-/* 概要文などの本文は読みやすい明朝体 */
-.location-desc, .popup-desc {
-    font-family: 'Noto Serif JP', serif;
-    font-weight: 400;
-    font-size: 0.9rem;
-    color: #555;
-}
-
-/* フィルタボタンの文字も少し整える */
-.filter-btn {
-    font-family: 'Noto Serif JP', serif;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-}
-/* 金魚が泳ぐ水槽 */
-.fish-tank {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1; 
-    overflow: hidden;
-    opacity: 0.4;
-}
-
-.fish {
-    position: absolute;
-    width: 20px;
-    height: 10px;
-    background: #be123c;
-    border-radius: 50%;
-    filter: blur(1px);
-}
-
-.fish::after {
-    content: '';
-    position: absolute;
-    right: -8px;
-    top: -2px;
-    width: 10px;
-    height: 14px;
-    background: #be123c;
-    clip-path: polygon(0 50%, 100% 0, 80% 50%, 100% 100%);
-}
-
-@keyframes swim {
-    0% { transform: translate(-50px, 0) rotate(0deg); }
-    100% { transform: translate(500px, 0) rotate(0deg); }
-}
-
-.fish:nth-child(1) { top: 20%; left: -50px; animation: swim 15s infinite linear; }
-.fish:nth-child(2) { top: 50%; left: -100px; animation: swim 20s infinite linear 2s; }
-.fish:nth-child(3) { top: 80%; left: -80px; animation: swim 18s infinite linear 5s; }
-.filter-btn {
-    min-width: 80px;
-    min-height: 35px; /* 最低でもこの高さがあると押しやすい */
-    font-size: 14px; /* 小さすぎるとAppleに怒られるポイント */
-}
-
-/* 検索窓も指でタップしやすい高さに */
-#search-input {
-    height: 44px; 
-    font-size: 16px; /* 16px以上にすると、入力時に画面が勝手にズームしません */
+/* スマホ対応 */
+@media (max-width: 768px) {
+    .sidebar { top: auto; left: 10px; right: 10px; bottom: 10px; width: auto; height: 35%; }
+    .sidebar.collapsed { transform: translateY(calc(100% + 15px)); }
+    .toggle-btn { right: 10px; top: -35px; border-radius: 10px 10px 0 0; width: 44px; height: 35px; }
 }
