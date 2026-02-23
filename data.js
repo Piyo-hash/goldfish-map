@@ -188,6 +188,6 @@ const goldfishLocations = [
   { name: "愛知県 錦鯉・金魚品評会", pref: "愛知県", lat: 35.0182505, lng: 137.2923893, category: "品評会", description: "大型の金魚が並ぶのが特徴。", season: "毎年秋頃" },
   { name: "熊本県 農業フェア", pref: "熊本県", lat: 32.8594427, lng: 130.7969149, category: "イベント", description: "最高品質の金魚が展示される。", season: "毎年秋頃" },
   { name: "きんぎょフェス", pref: "奈良県", lat: 34.6474681, lng: 135.7833, category: "イベント", description: "音楽や食の融合イベント。", season: "不定期" },
-{ name: "日本観賞魚祭", pref: "東京都", lat: 35.6902845, lng: 139.6875281, category: "イベント", description: "魅力を総合的に発信する祭典。" },
+  { name: "日本観賞魚祭", pref: "東京都", lat: 35.6902845, lng: 139.6875281, category: "イベント", description: "魅力を総合的に発信する祭典。" },
   { name: "金魚専門店「金魚屋 あいこ」", pref: "奈良県", lat: 34.2975528, lng: 135.8279734, category: "直売所", description: "大和郡山の人気店。飼育相談に定評あり。" }
 ]; //

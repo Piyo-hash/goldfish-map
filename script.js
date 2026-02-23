@@ -2,10 +2,14 @@
 const map = L.map('map').setView([36.2048, 138.2529], 5); // 日本全体を中心に
 
 // 地図タイルの読み込み
-// script.js の L.tileLayer 部分をこれに書き換え
 L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a>'
+    attribution: '© <a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a>'
 }).addTo(map);
+
+// ★1. クラスタグループの初期化
+const markerClusterGroup = L.markerClusterGroup();
+map.addLayer(markerClusterGroup);
+
 let markers = [];
 const locationListEl = document.getElementById('location-list');
 const filterBtns = document.querySelectorAll('.filter-btn');
@@ -51,27 +55,29 @@ function createCustomIcon(category) {
 
 // アプリの描画（ピンとリスト）
 function renderApp(data) {
-    // 既存のピンを削除
-    markers.forEach(m => map.removeLayer(m.marker));
+    // ★2. 既存のピンを削除（クラスタグループをクリア）
+    markerClusterGroup.clearLayers();
     markers = [];
     locationListEl.innerHTML = '';
 
     if (!data) return;
 
     data.forEach(item => {
-        // 【重要】座標が数字でない場合はスキップ（エラー対策）
         const lat = parseFloat(item.lat);
         const lng = parseFloat(item.lng);
         if (isNaN(lat) || isNaN(lng)) return;
 
         // ピンの作成
         const icon = createCustomIcon(item.category);
-        const marker = L.marker([lat, lng], { icon: icon }).addTo(map);
+        const marker = L.marker([lat, lng], { icon: icon });
 
         const description = item.description || item.desc || "詳細情報はありません。";
         const season = item.season ? `<div class="popup-season"><i class="fa-regular fa-calendar"></i> ${item.season}</div>` : '';
 
-        // 吹き出しの内容
+        // ★3. 吹き出しの内容（Googleマップ連携ボタンを追加）
+        // URLのミスを修正しました（${lat} に修正）
+        const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+        
         const popupContent = `
             <div class="popup-card">
                 <h3>${item.name}</h3>
@@ -81,9 +87,17 @@ function renderApp(data) {
                 </div>
                 <div class="popup-desc">${description}</div>
                 ${season}
+                <div class="popup-actions">
+                    <a href="${googleMapsUrl}" target="_blank" rel="noopener" class="google-maps-link">
+                        <i class="fa-solid fa-location-arrow"></i> Googleマップで開く
+                    </a>
+                </div>
             </div>
         `;
         marker.bindPopup(popupContent);
+
+        // ★4. クラスタグループにピンを追加
+        markerClusterGroup.addLayer(marker);
 
         // サイドバーの項目作成
         const listItem = document.createElement('div');
@@ -110,9 +124,28 @@ function renderApp(data) {
     });
 }
 
-// データの初期読み込み
-const mapData = (typeof goldfishLocations !== 'undefined') ? goldfishLocations : [];
-renderApp(mapData);
+// ★5. 現在地表示機能
+function onLocationFound(e) {
+    const radius = e.accuracy / 2;
+    // 現在地に目立つマークを置く
+    L.circleMarker(e.latlng, {radius: 10, color: '#4285F4', fillOpacity: 0.8}).addTo(map)
+        .bindPopup("あなたの現在地付近です").openPopup();
+    map.flyTo(e.latlng, 14);
+}
+
+function onLocationError(e) {
+    alert("位置情報の取得に失敗しました。ブラウザの設定で位置許可をオンにしてください。");
+}
+
+map.on('locationfound', onLocationFound);
+map.on('locationerror', onLocationError);
+
+const locateBtn = document.getElementById('locate-btn');
+if (locateBtn) {
+    locateBtn.addEventListener('click', () => {
+        map.locate({setView: true, maxZoom: 15});
+    });
+}
 
 // フィルタリング機能
 let currentCategory = 'all';
@@ -154,15 +187,18 @@ searchInput.addEventListener('input', (e) => {
     searchQuery = e.target.value;
     filterData();
 });
+
 // サイドバー開閉の仕組み
 const sidebar = document.getElementById('sidebar');
 const toggleBtn = document.getElementById('toggle-sidebar');
 
-toggleBtn.addEventListener('click', () => {
-    sidebar.classList.toggle('collapsed');
-    
-    // 地図の表示崩れを防ぐため、少し遅れてサイズを再計算
-    setTimeout(() => {
-        map.invalidateSize();
-    }, 400);
-});
+if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('collapsed');
+        setTimeout(() => { map.invalidateSize(); }, 400);
+    });
+}
+
+// 初回描画
+const mapData = (typeof goldfishLocations !== 'undefined') ? goldfishLocations : [];
+renderApp(mapData);
