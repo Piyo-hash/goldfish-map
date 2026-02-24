@@ -40,7 +40,16 @@
 
             <div class="visit-counter">
                 <span class="stamp-icon">🏮</span>
-                金魚巡り <span class="count-num" id="visit-count">0</span> / 192 スポット
+                金魚巡り <span class="count-num" id="visit-count">0</span> / <span id="total-count">192</span> スポット
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-text" id="progress-text">制覇まであと 192 カ所！</div>
+            </div>
+
+            <div class="daily-pick" id="daily-pick">
+                <div class="daily-pick-label"><i class="fa-solid fa-wand-magic-sparkles"></i> 本日のおすすめ</div>
+                <div class="daily-pick-content" id="daily-pick-content"></div>
             </div>
 
             <div class="search-box">
@@ -58,6 +67,20 @@
             </div>
 
             <div class="location-list" id="location-list"></div>
+
+            <div class="report-section">
+                <div class="report-title"><i class="fa-solid fa-bullhorn"></i> 情報を教えてね！</div>
+                <div class="report-buttons">
+                    <a href="https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform" target="_blank" rel="noopener"
+                        class="report-btn report-btn-closed">
+                        <i class="fa-solid fa-shop-slash"></i> 閉店を報告
+                    </a>
+                    <a href="https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform" target="_blank" rel="noopener"
+                        class="report-btn report-btn-new">
+                        <i class="fa-solid fa-plus"></i> 新スポット情報
+                    </a>
+                </div>
+            </div>
         </aside>
 
         <main class="map-container">

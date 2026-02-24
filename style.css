@@ -160,6 +160,106 @@ header p {
     font-size: 1rem;
 }
 
+/* プログレスバー */
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(190, 18, 60, 0.1);
+    border-radius: 10px;
+    margin: 6px 0 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--shu-red), #e8a030, #f0c050);
+    border-radius: 10px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.progress-fill::after {
+    content: '🐟';
+    position: absolute;
+    right: -6px;
+    top: -6px;
+    font-size: 14px;
+    animation: swimBob 1.5s ease-in-out infinite;
+}
+
+@keyframes swimBob {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+.progress-text {
+    font-size: 0.7rem;
+    color: var(--text-sub);
+    letter-spacing: 0.03em;
+}
+
+/* ===== 本日のおすすめカード ===== */
+.daily-pick {
+    background: linear-gradient(135deg, rgba(190, 18, 60, 0.06), rgba(232, 160, 48, 0.08));
+    border: 1px solid rgba(232, 160, 48, 0.25);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.daily-pick:hover {
+    background: linear-gradient(135deg, rgba(190, 18, 60, 0.1), rgba(232, 160, 48, 0.14));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(232, 160, 48, 0.15);
+}
+
+.daily-pick-label {
+    font-size: 0.72rem;
+    font-weight: bold;
+    color: var(--kohaku);
+    margin-bottom: 6px;
+    letter-spacing: 0.05em;
+}
+
+.daily-pick-label i {
+    margin-right: 4px;
+}
+
+.daily-pick-name {
+    font-family: 'Zen Old Mincho', serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 3px;
+}
+
+.daily-pick-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.daily-pick-desc {
+    font-size: 0.75rem;
+    color: var(--text-sub);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
 /* ===== 検索ボックス ===== */
 .search-box {
     position: relative;
@@ -635,6 +735,109 @@ header p {
 .custom-pin {
     background: none !important;
     border: none !important;
+}
+
+/* マーカーホバー時の尾びれアニメーション */
+.custom-pin .marker-inner {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.custom-pin:hover .marker-inner {
+    transform: rotate(-45deg) scale(1.15);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.custom-pin .fish-icon {
+    transition: transform 0.3s ease;
+}
+
+.custom-pin:hover .fish-icon {
+    animation: tailWag 0.4s ease-in-out infinite;
+    transform-origin: center;
+}
+
+@keyframes tailWag {
+    0% {
+        transform: rotate(45deg) scaleX(1);
+    }
+
+    25% {
+        transform: rotate(45deg) scaleX(0.85) skewY(5deg);
+    }
+
+    50% {
+        transform: rotate(45deg) scaleX(1);
+    }
+
+    75% {
+        transform: rotate(45deg) scaleX(0.85) skewY(-5deg);
+    }
+
+    100% {
+        transform: rotate(45deg) scaleX(1);
+    }
+}
+
+/* ===== 報告セクション ===== */
+.report-section {
+    padding: 10px 0 5px;
+    border-top: 1px solid var(--washi-border);
+    margin-top: 8px;
+}
+
+.report-title {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--text-sub);
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+}
+
+.report-title i {
+    margin-right: 4px;
+    color: var(--kohaku);
+}
+
+.report-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.report-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    font-family: 'Noto Serif JP', serif;
+    text-decoration: none;
+    transition: all 0.25s ease;
+}
+
+.report-btn-closed {
+    background: rgba(190, 18, 60, 0.08);
+    color: var(--shu-red);
+    border: 1px solid rgba(190, 18, 60, 0.2);
+}
+
+.report-btn-closed:hover {
+    background: rgba(190, 18, 60, 0.15);
+    transform: translateY(-1px);
+}
+
+.report-btn-new {
+    background: rgba(74, 124, 89, 0.08);
+    color: var(--matcha);
+    border: 1px solid rgba(74, 124, 89, 0.2);
+}
+
+.report-btn-new:hover {
+    background: rgba(74, 124, 89, 0.15);
+    transform: translateY(-1px);
 }
 
 /* ===== レスポンシブ（スマホ） ===== */

@@ -11,15 +11,41 @@ const categoryImages = {
     'default': 'https://images.unsplash.com/photo-1524704654690-b56c05c78a00?w=400&h=250&fit=crop'
 };
 
+// SVGプレースホルダー（外部画像がロードできない場合用）
+const categoryPlaceholderColors = {
+    '常設展示': '#1e3a5f',
+    'イベント': '#be123c',
+    '養殖・直売': '#4a7c59',
+    '養殖・研究': '#4a7c59',
+    '養殖場': '#4a7c59',
+    '養殖': '#4a7c59',
+    '品評会': '#c77c2a',
+    '直売所': '#6b7280',
+    'default': '#4b5563'
+};
+
+function makePlaceholderSvg(category) {
+    const color = categoryPlaceholderColors[category] || categoryPlaceholderColors['default'];
+    return `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="250" viewBox="0 0 400 250"><rect fill="${color}" width="400" height="250" opacity="0.12"/><text x="200" y="130" text-anchor="middle" font-size="48" fill="${color}" opacity="0.3" font-family="serif">🐟</text></svg>`)}`;
+}
+
 function getCategoryImage(category) {
     return categoryImages[category] || categoryImages['default'];
+}
+
+function handleImageError(img, category) {
+    img.src = makePlaceholderSvg(category || 'default');
+    img.onerror = null;
 }
 
 // ===== 地図の初期化 =====
 const map = L.map('map').setView([36.2048, 138.2529], 5);
 
-L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
-    attribution: '© <a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a>'
+// CartoDB Voyager（水色基調の柔らかいタイル）
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19
 }).addTo(map);
 
 // クラスタグループの初期化
@@ -78,20 +104,42 @@ function getVisitedCount() {
 }
 
 function updateVisitCounter() {
+    const totalSpots = (typeof goldfishLocations !== 'undefined') ? goldfishLocations.length : 192;
+    const visitedCount = getVisitedCount();
     const el = document.getElementById('visit-count');
-    if (el) el.textContent = getVisitedCount();
+    if (el) el.textContent = visitedCount;
+
+    const totalEl = document.getElementById('total-count');
+    if (totalEl) totalEl.textContent = totalSpots;
+
+    // プログレスバー更新
+    const progressFill = document.getElementById('progress-fill');
+    if (progressFill) {
+        const pct = totalSpots > 0 ? (visitedCount / totalSpots) * 100 : 0;
+        progressFill.style.width = pct + '%';
+    }
+
+    // プログレステキスト更新
+    const progressText = document.getElementById('progress-text');
+    if (progressText) {
+        const remaining = totalSpots - visitedCount;
+        if (remaining <= 0) {
+            progressText.textContent = '🎉 全スポット制覇おめでとう！';
+            progressText.style.color = 'var(--shu-red)';
+            progressText.style.fontWeight = 'bold';
+        } else {
+            progressText.textContent = `制覇まであと ${remaining} カ所！`;
+        }
+    }
 }
 
 // ===== 魚シルエット SVG ピン =====
 function createCustomIcon(category, visited) {
     const color = categoryColors[category] || categoryColors['その他'];
-    const fishSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="white">
-        <path d="M12 2C12 2 3 8 3 12s9 10 9 10 9-6 9-10S12 2 12 2zm0 3c1.5 2 5 5 6.5 7-1.5 2-5 5-6.5 7-1.5-2-5-5-6.5-7C7 10 10.5 7 12 5zm0 4a3 3 0 100 6 3 3 0 000-6z"/>
-    </svg>`;
     const goldStar = visited ? `<span style="position:absolute;top:-5px;right:-5px;font-size:12px;">⭐</span>` : '';
     return L.divIcon({
         className: 'custom-pin',
-        html: `<div style="
+        html: `<div class="marker-inner" style="
             position: relative;
             background: linear-gradient(135deg, ${color}, ${color}dd);
             width: 32px;
@@ -105,7 +153,7 @@ function createCustomIcon(category, visited) {
             border: 2px solid rgba(255,255,255,0.8);
             ${visited ? 'border-color: #e8a030;' : ''}
         ">
-            <i class="fa-solid fa-fish" style="
+            <i class="fa-solid fa-fish fish-icon" style="
                 transform: rotate(45deg);
                 color: white;
                 font-size: 14px;
@@ -147,9 +195,10 @@ function renderApp(data) {
         const visitedClass = visited ? ' is-visited' : '';
         const visitedLabel = visited ? '✓ 訪問済み' : '🐟 行ったよ！';
 
+        const escapedName = item.name.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
         const popupContent = `
             <div class="popup-card">
-                <img src="${imageUrl}" alt="${item.name}" class="popup-image" onerror="this.style.display='none'">
+                <img src="${imageUrl}" alt="${item.name}" class="popup-image" onerror="handleImageError(this,'${item.category}')">
                 <div class="popup-body">
                     <h3>${item.name}</h3>
                     <div class="popup-meta">
@@ -162,7 +211,7 @@ function renderApp(data) {
                         <a href="${googleMapsUrl}" target="_blank" rel="noopener" class="google-maps-link">
                             <i class="fa-solid fa-location-arrow"></i> Googleマップ
                         </a>
-                        <button class="visited-btn${visitedClass}" onclick="toggleVisited('${item.name.replace(/'/g, "\\'")}', this)">
+                        <button class="visited-btn${visitedClass}" data-spot="${escapedName}" onclick="toggleVisited(this.dataset.spot, this)">
                             ${visitedLabel}
                         </button>
                     </div>
@@ -177,7 +226,7 @@ function renderApp(data) {
         const listItem = document.createElement('div');
         listItem.className = 'location-item';
         listItem.innerHTML = `
-            <img src="${imageUrl}" alt="" class="thumb" onerror="this.style.display='none'" loading="lazy">
+            <img src="${imageUrl}" alt="" class="thumb" onerror="handleImageError(this,'${item.category}')" loading="lazy">
             <div class="item-content">
                 <span class="location-title">${item.name}</span>
                 <div class="location-meta">
@@ -304,3 +353,46 @@ if (toggleBtn) {
 // ===== 初回描画 =====
 const mapData = (typeof goldfishLocations !== 'undefined') ? goldfishLocations : [];
 renderApp(mapData);
+
+// ===== 本日のおすすめスポット =====
+function showDailyPick() {
+    const data = (typeof goldfishLocations !== 'undefined') ? goldfishLocations : [];
+    if (data.length === 0) return;
+
+    // 日付ベースのシード値でランダムに1スポット選出
+    const today = new Date();
+    const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+    const index = seed % data.length;
+    const spot = data[index];
+
+    const contentEl = document.getElementById('daily-pick-content');
+    if (!contentEl) return;
+
+    const description = spot.description || spot.desc || '';
+    contentEl.innerHTML = `
+        <div class="daily-pick-name">${spot.name}</div>
+        <div class="daily-pick-meta">
+            <span class="badge ${spot.category}">${spot.category}</span>
+            <span style="font-size:0.75rem;color:#6b5e50">${spot.pref}</span>
+        </div>
+        <div class="daily-pick-desc">${description}</div>
+    `;
+
+    // クリックで地図上のスポットにフォーカス
+    const dailyPickEl = document.getElementById('daily-pick');
+    if (dailyPickEl) {
+        dailyPickEl.addEventListener('click', () => {
+            const lat = parseFloat(spot.lat);
+            const lng = parseFloat(spot.lng);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                map.flyTo([lat, lng], 14, { animate: true, duration: 1.5 });
+                // 対応するマーカーのポップアップを開く
+                const found = markers.find(m => m.item.name === spot.name);
+                if (found) {
+                    setTimeout(() => found.marker.openPopup(), 1600);
+                }
+            }
+        });
+    }
+}
+showDailyPick();
